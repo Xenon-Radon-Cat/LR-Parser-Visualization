@@ -1,23 +1,21 @@
 import logo from './logo.svg';
 import './App.css';
+import { Lexical } from './pages/lexicalAnalysis';
+import { LLgramma } from './pages/LLgrammaAnalysis';
+import { LRgramma } from './pages/LRgrammaAnalysis';
+import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Router>
+        <Routes>
+          <Route path="/Lexical" element={<Lexical/>} />
+          <Route path="/LLgramma" element={<LLgramma/>}/>
+          <Route path="/LRgramma" element={<LRgramma/>}/>
+          <Route path="/LLgramma" element={<LLgramma/>}/>
+        </Routes>
+      </Router>
     </div>
   );
 }
