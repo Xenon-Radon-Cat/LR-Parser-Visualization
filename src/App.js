@@ -3,6 +3,7 @@ import './App.css';
 import { Lexical } from './pages/lexicalAnalysis';
 import { LLgramma } from './pages/LLgrammaAnalysis';
 import { LRgramma } from './pages/LRgrammaAnalysis';
+import { Recgramma } from './pages/RecgrammaAnalysis';
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 
 function App() {
@@ -13,7 +14,7 @@ function App() {
           <Route path="/Lexical" element={<Lexical/>} />
           <Route path="/LLgramma" element={<LLgramma/>}/>
           <Route path="/LRgramma" element={<LRgramma/>}/>
-          <Route path="/LLgramma" element={<LLgramma/>}/>
+          <Route path="/Recgramma" element={<Recgramma/>}/>
         </Routes>
       </Router>
     </div>
