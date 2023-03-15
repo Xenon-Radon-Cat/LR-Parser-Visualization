@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react'
 import { Input, Button, Row, Col} from 'antd';
+import { useDispatch } from 'react-redux';
+import { grammarUpdated } from './grammarSlice';
 
 const { TextArea } = Input;
 
@@ -9,6 +11,7 @@ export const InputGrammar = () => {
     const initialText = 'S ::= ( L )\nS ::= x\nL ::= S\nL ::= L ; S'
     const [text, setText] = useState(initialText)
     const onTextChange = (e) => setText(e.target.value)
+    const dispatch = useDispatch()
 
     return (
         <div className='InputGrammar'>
@@ -29,7 +32,7 @@ export const InputGrammar = () => {
                     </div>
                 </Col>
             </Row>
-            <Button type='primary' className='Button' size='large' onClick={() => console.log("Emit")}>Generate LR(0) Automation</Button>
+            <Button type='primary' className='Button' size='large' onClick={() => dispatch(grammarUpdated(text))}>Generate LR(0) Automation</Button>
         </div>
     )
 }
