@@ -1,6 +1,35 @@
+// top-level component of SLR Parser Visualization
 
-export function LRgramma() {
-    return <div>
-        LR语法分析
+import React from 'react';
+import { Col, Row} from 'antd';
+import { InputGrammar } from './InputGrammar';
+import './index.css'
+import { Provider } from 'react-redux'
+import store from './store'
+
+export const LRgramma = () => (
+    <div className='LRGrammar'>
+        <Provider store={store}>
+        <h1 className='header'> SLR Parser Visualization</h1>
+        <InputGrammar/>
+        {/*
+        <Row>
+            <Col span={12}>
+                Parse Table
+            </Col>
+            <Col span={12}>
+                Automation
+            </Col>
+        </Row>
+        <Row>
+            <Col span={12}>
+                Parse Expression
+            </Col>
+            <Col span={12}>
+                Parse Tree
+            </Col>
+        </Row>
+        */}
+        </Provider>
     </div>
-}
+)
