@@ -1,3 +1,5 @@
+import { Circle, Rect, Stage, Layer, Text, Star } from 'react-konva'
+import Konva from "konva";
 export class Prod {
     constructor(str) {
         this.prod = str;
@@ -16,15 +18,15 @@ export class Prod {
         for (let i = 0; i < this.prod.length; ++i) {
             let c = this.prod[i];
             let isVn = regex.test(c)
-            
+
             if (isVn) {
-                
+
                 this.Vn.add(c);
             }
             else if (c !== '|' && !(c === '-' && this.prod[i + 1] === '>' && ++i))
                 this.Vt.add(c);
         }
-       
+
         for (let i = 3; i < this.prod.length; ++i) {
             let j;
             for (j = i + 1; j < this.prod.length && this.prod[j] !== '|'; ++j);
@@ -36,7 +38,7 @@ export class Prod {
 
     }
 
- 
+
 }
 
 
@@ -50,6 +52,7 @@ export class LL1 {
         this.M = new Map();
         this.gra = [];
         this.production = '';
+        this.root = new Node();
     }
     addProd(prod) {
         if (prod.isValid) {
@@ -70,7 +73,25 @@ export class LL1 {
         else return false;
     }
 
+    isLeftRecursive() {
+        for(let rule of this.G){
+            for(let sel of rule.selection){
+                if(rule.noTerminal === sel[0]){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
+    isCFG() {
+        for (let prod of this.G) {
+            if (!prod.terminal || !this.VN.has(prod.terminal)) {
+                return false;
+            }
+
+        }
+    }
 
     first(str) {
         let prod = new Prod(str);
@@ -91,7 +112,7 @@ export class LL1 {
             return new Set(['@']);
         }
         else if (str.length === 1) {
-           
+
             if (this.VT.has(str)) {
                 return new Set([str])
             }
@@ -105,9 +126,9 @@ export class LL1 {
                                 b = index;
                             }
                         })
-                       
+
                         let f = this.first(this.G[b].prod);
-                      
+
                         if (this.FIRST.has(str)) {
                             f.forEach((item) => this.FIRST.get(str).add(item))
                         } else {
@@ -120,13 +141,13 @@ export class LL1 {
         } else {
             let ret = new Set();
             for (let i = 0; i < str.length; ++i) {
-               
+
                 let f = this.first(str.substring(i, i + 1));
-                
+
                 if (f.has('@') && str.length - 1 !== i) {
                     f.delete('@');
                     f.forEach((item) => ret.add(item))
-                    
+
                 } else {
                     f.forEach((item) => ret.add(item))
                     break;
@@ -138,8 +159,8 @@ export class LL1 {
     follow() {
         for (let pp of this.G) {
             this.FOLLOW.set(pp.noTerminal, new Set([]));
-            if(pp.noTerminal === this.G[0].noTerminal) {
-                this.FOLLOW.set(pp.noTerminal,new Set('#'))
+            if (pp.noTerminal === this.G[0].noTerminal) {
+                this.FOLLOW.set(pp.noTerminal, new Set('#'))
             }
             let size = -1;
             while (size !== this.FOLLOW.get(pp.noTerminal).size) {
@@ -149,15 +170,15 @@ export class LL1 {
                     for (let p of this.G) {
                         for (let s of p.selection) {
                             let loc = s.split('').find((item) => item === X);
-                            
+
                             if (loc) {
-                               
+
                                 let f;
                                 if (s.indexOf(X) + 1 >= s.length) {
                                     f = this.first('');
-                                  
+
                                 } else {
-                                     f = this.first(s[s.indexOf(X) + 1]);
+                                    f = this.first(s[s.indexOf(X) + 1]);
                                 }
                                 if (this.FOLLOW.has(X)) {
                                     f.forEach((item) => this.FOLLOW.get(X).add(item));
@@ -177,49 +198,51 @@ export class LL1 {
         }
     }
     parseTable() {
-        for(let prod of this.G) {
-            for(let sel of prod.selection) {
+        for (let prod of this.G) {
+            for (let sel of prod.selection) {
                 let f = this.first(sel);
-                for(let terminal of f) {
-                    if(terminal === '@'){
-                        for(let term of this.FOLLOW.get(prod.noTerminal)){
-                           this.M.set(`${prod.noTerminal},${term}`,sel);
+                for (let terminal of f) {
+                    if (terminal === '@') {
+                        for (let term of this.FOLLOW.get(prod.noTerminal)) {
+                            this.M.set(`${prod.noTerminal},${term}`, sel);
                         }
-                    }else {
-                        this.M.set(`${prod.noTerminal},${terminal}`,sel);
+                    } else {
+                        this.M.set(`${prod.noTerminal},${terminal}`, sel);
                     }
                 }
             }
         }
     }
     match(str) {
-        if(str.length === 1&& str === this.gra[this.gra.length -1]) {
-              return '';
-        }
-        if(this.gra.length === 0) {
+        if (this.gra.length === 0) {
             this.gra.push([...this.VN][0]);
+            this.root = new Node([...this.VN][0]);
         }
-        
+
         let value;
-        for(let item of this.gra){
-            if(this.VN.has(item)){
+        for (let item of this.gra) {
+            if (this.VN.has(item)) {
                 let key = `${item},${str[0]}`;
                 value = this.M.get(key);
                 this.production = `${item} => ${value}`;
                 value = value.split('');
-                
-                for(let k in this.gra){
-                    if(this.gra[k] === item){
-                        this.gra.splice(k,1);
-                    }else{
+                let n = this.find(this.root);
+                value.map((item) => {
+                    n.children.push(new Node(item));
+                })
+                console.log(this.root, 'root')
+                for (let k in this.gra) {
+                    if (this.gra[k] === item) {
+                        this.gra.splice(k, 1);
+                    } else {
                         continue;
                     }
-                   
-                    if(value[0] === '@'){ 
+
+                    if (value[0] === '@') {
                         return str;
                     }
-                    this.gra.splice(k,0,...value);
-                    if(str[0] === value[0]) {
+                    this.gra.splice(k, 0, ...value);
+                    if (str[0] === value[0]) {
                         str.shift();
                         return str;
                     }
@@ -228,8 +251,170 @@ export class LL1 {
                 break;
             }
         }
+
+    }
+    find(n) {
+        if (this.VN.has(n.value) && n.children.length === 0) return n;
+        if (this.VT.has(n.value)) return;
+        for (let i = 0; i < n.children.length; i++) {
+            let res = this.find(n.children[i]);
+            if (res) return res;
+        }
     }
 }
+
+export class Node {
+    constructor(value) {
+        this.value = value;
+        this.children = [];
+    }
+}
+let arr = [];
+let text = [];
+let line = [];
+let message = new Konva.Text({
+    x: 200,
+    y: 50,
+    text: '',
+    fontSize: 30,
+    fontFamily: 'Calibri',
+    fill: 'green'
+})
+let layerg;
+
+export function RenderTree(props) {
+    var stage = new Konva.Stage({
+        container: 'container', // 容器 id
+        width: 1000,// canvas 宽度
+        height: 1000// canvas 高度
+    });
+    var layer = new Konva.Layer();
+    layerg = layer;
+    stage.add(layer);
+
+    var Circle = new Konva.Circle({
+        x: 50,
+        y: 50,
+        width: 100,
+        height: 100,
+        fill: 'blue'
+    })
+    //   layer.add(Circle);
+    console.log(Circle.x(), 55535)
+    arr = [];
+    text = [];
+    line = [];
+    rendernode(props, 1);
+    console.log(arr, 9090)
+    arr.forEach((cir) => {
+        layer.add(cir);
+    })
+    text.forEach((t) => {
+        layer.add(t)
+    })
+    line.forEach((l) => {
+        layer.add(l);
+    })
+    layer.add(message);
+}
+
+
+
+function rendernode(node, index) {
+
+    if (!node) return;
+    if (node.children.length === 0) {
+        let height = index * 150;
+        let bro = arr.filter((item) => item.y() === height);
+
+        let x = bro.length === 0 ? 100 : (bro.length + 1) * 100;//(arr.length + 1) * 100;
+        const place = {
+            x: x,
+            y: height
+        }
+        const cir = new treenode(place, node.value)
+        arr.push(cir);
+        var simpleText = new Konva.Text({
+            x: x - 10,
+            y: height - 10,
+            text: node.value,
+            fontSize: 30,
+            fontFamily: 'Calibri',
+            fill: 'green'
+        });
+        text.push(simpleText);
+        return cir;
+    }
+    let child = [];
+    for (let i = 0; i < node.children.length; i++) {
+        child.push(rendernode(node.children[i], index + 1));
+    }
+    let height = index * 150;
+    //let child = arr.filter((item) => item.y() === (index + 1) * 150);
+    let x;
+    if (child.length % 2) {
+        x = child[Math.floor(child.length / 2)].x();
+    } else {
+        x = (child[child.length / 2 - 1].x() + child[child.length / 2].x()) / 2;
+    }
+    const cir = new treenode({ x: x, y: height }, node.value);
+    arr.push(cir);
+    child.forEach((c) => {
+        var redLine = new Konva.Line({
+            points: [c.x(), c.y() - 20, cir.x(), cir.y() + 20],
+            stroke: 'gray',
+            strokeWidth: 5,
+            lineCap: 'round',
+            lineJoin: 'round'
+        });
+        line.push(redLine);
+    })
+
+    var simpleText = new Konva.Text({
+        x: x - 10,
+        y: height - 10,
+        text: node.value,
+        fontSize: 30,
+        fontFamily: 'Calibri',
+        fill: 'green'
+    });
+    text.push(simpleText);
+    let right = node.children.map((child) => child.value);
+    cir.on('mouseover', function () {
+        message.text(`${node.value} -> ${[...right].join()}`)
+        console.log(8888)
+        layerg.draw();
+    })
+    return cir;
+}
+
+function treenode(place, value) {
+
+    var Circle;
+    let regex = /[A-Z]/;
+    let isVN = regex.test(value);
+    if (isVN) {
+        Circle = new Konva.Circle({
+            x: place.x,
+            y: place.y,
+            width: 50,
+            height: 50,
+            fill: 'blue'
+        })
+
+    } else {
+        Circle = new Konva.Circle({
+            x: place.x,
+            y: place.y,
+            width: 50,
+            height: 50,
+            fill: 'yellow'
+        })
+    }
+
+    return Circle;
+}
+
 
 
 

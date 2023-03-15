@@ -1,0 +1,50 @@
+.title{
+    font-size: larger;
+    margin-top: 30px;
+}
+.input{
+    display: flex;
+    flex-direction: column;
+    width: 50vw;
+    height: 60vh;
+    margin-left: 20px;
+}
+.body{
+    display: flex;
+    flex-direction: row;
+    margin-top: 20px;
+}
+.firstfollow{
+    width: 45vw;
+    margin-left: 20px;
+}
+.button{
+    margin-top: 10px;
+    align-items: end;
+    
+}
+.table{
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    margin-left: 20px;
+}
+.predictTable{
+    width: 50vw;
+}
+.recursionTable{
+    width: 50vw;
+    margin-left: 10px;
+}
+@media screen and (max-width: 800px) {
+    .body {
+     flex-direction: column;
+    }
+    .input {
+        width: 100vw;
+    }
+    .firstfollow{
+        width: 100vw;
+    }
+  }
+
