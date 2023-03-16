@@ -6,6 +6,7 @@
 }
 
 .LRGrammar > .header {
+    text-align: center;
     font-size: 300%;
     font-weight: 100;
     color: rgb(75, 75, 75);
@@ -16,7 +17,9 @@
     text-align: left;
 }
 
-.InputGrammar > .header {
+
+.header {
+    text-align: left;
     font-weight: 300;
     color: #888;
 }
