@@ -6,11 +6,11 @@ const expandSymbol = '::='
 
 const initialState = {
     productions: [
+        ['S\'', expandSymbol, 'S'],
         ['S', expandSymbol, '(', 'L', ')'],
         ['S', expandSymbol, 'x'],
         ['L', expandSymbol, 'S'],
-        ['L', expandSymbol, 'L', ';', 'S'],
-        ['S\'', expandSymbol, 'S']
+        ['L', expandSymbol, 'L', ';', 'S']
     ]
 }
 
@@ -21,7 +21,7 @@ const grammarSlice = createSlice({
     reducers: {
         grammarUpdated(state, action) {
             const text = action.payload
-            const productions = []
+            const productions = [['S\'', expandSymbol, '']]
 
             for(const line of text.trim().split(/\n+/)) {
                 const production = line.trim().split(/\s+/)
@@ -44,13 +44,13 @@ const grammarSlice = createSlice({
             }
 
             // check whether 'productions' is empty
-            if(productions.length === 0) {
+            if(productions.length === 1) {
                 alert('please input your grammar first')
                 return state
             }
             
-            //augment grammar
-            productions.push(['S\'', expandSymbol, productions[0][0]])
+            // write back start symbol into augmented production
+            productions[0][2] = productions[1][0]
             
             state.productions = productions
         }
