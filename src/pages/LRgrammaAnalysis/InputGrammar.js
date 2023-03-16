@@ -15,7 +15,7 @@ export const InputGrammar = () => {
 
     return (
         <div className='InputGrammar'>
-            <h2 className='header'>Write your SLR grammar</h2>
+            <h2 className='header'>1.Write your SLR grammar</h2>
             <Row>
                 <Col span={4}>
                     <TextArea className="TextArea" value={text} autoSize={{minRows: 12, maxRows: 24}} onChange={onTextChange}/>
