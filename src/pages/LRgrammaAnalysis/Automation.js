@@ -114,7 +114,8 @@ export const Automation = () => {
         // add node identifier
         dot += nodeIndex
         // add the prologue of attribute list
-        dot += ' [label=\"'
+        dot += ` [label="q${nodeIndex}\n`
+        // add the productions
         for(const { productionIndex, dotIndex } of nodes[nodeIndex]) {
             const production = productions[productionIndex]
             // add the part behind the dot
@@ -129,7 +130,7 @@ export const Automation = () => {
             dot += '\\n'
         }
         // add the epilog of attribute list
-        dot += '\"];\n';
+        dot += '"];\n';
     }
 
     // add edge statement list
@@ -139,9 +140,9 @@ export const Automation = () => {
         dot += ' -> '
         dot += targetIndex
         // add the label
-        dot += ' [label=\"'
+        dot += ' [label="'
         dot += label
-        dot += '\"];\n';
+        dot += '"];\n';
     }
 
     // add the epilog
