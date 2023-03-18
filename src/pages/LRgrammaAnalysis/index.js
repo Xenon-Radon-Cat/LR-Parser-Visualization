@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import './index.css'
-import { computeAutomation, computeParseTable } from './compute'
+import { computeAutomation, computeParseTable, computeFirstFollow } from './compute'
 import { InputGrammar } from './InputGrammar'
 import { Automation } from './Automation'
 import { ParseTable } from './ParseTable'
@@ -25,17 +25,20 @@ export const LRgramma = () => {
     })
     const [automation, setAutomation] = useState(null)
     const [parseTable, setParseTable] = useState(null)
+    const [firstFollow, setFirstFollow] = useState(null)
 
 
     const grammarUpdated = (grammar) => {
         const automation = computeAutomation(grammar)
         const parseTable = computeParseTable(grammar, automation)
+        const firstFollow = computeFirstFollow(grammar)
         setGrammar(grammar)
         setAutomation(automation)
         setParseTable(parseTable)
+        setFirstFollow(firstFollow)
     }
 
-    if(automation === null || parseTable === null) 
+    if(automation === null) 
         grammarUpdated(grammar)
 
     return (
@@ -43,7 +46,7 @@ export const LRgramma = () => {
             <h1 className='header'> SLR Parser Visualization</h1>
             <InputGrammar  grammarUpdated={grammarUpdated}/>  
             <Automation grammar={grammar} automation={automation}/>
-            <ParseTable grammar={grammar} parseTable={parseTable}/>
+            <ParseTable grammar={grammar} firstFollow={firstFollow} parseTable={parseTable}/>
         </div>
     )
 }

@@ -150,4 +150,109 @@ const computeParseTable = (grammar, automation) => {
     return parseTable
 }
 
-export { computeAutomation, computeParseTable }
+
+const unionSet = (setA, setB) => {
+    // union 'setA' and 'setB' and store the result in 'setA'
+    for(const element of setB)
+        setA.add(element)
+}
+
+const computeFirstFollow = (grammar) => {
+    // 'grammar': { productions: String[][], productionMap: Map<String, Number[]>, terminalSet: Set<String> }
+    const { productions, productionMap, terminalSet } = grammar
+
+    const first = new Map() // Map<String, Set<String>>
+    const follow = new Map() // Map<String, Set<String>>
+    const nullable = new Map() // Map<String, Bool>
+
+    // initialize above maps
+    for(const nonTerminal of productionMap.keys()) {
+        first.set(nonTerminal, new Set())
+        follow.set(nonTerminal, new Set())
+        nullable.set(nonTerminal, false)
+    }
+    
+    for(const terminal of terminalSet) {
+        first.set(terminal, new Set([terminal]))
+        follow.set(terminal, new Set())
+        nullable.set(terminal, false)
+    }
+
+    // compute 'nullable'
+    let needIteration = true
+    while(needIteration) {
+        needIteration = false
+        LOOP:
+        for(const production of productions) {
+            const nonTerminal = production[0]
+            for(let i = 2; i < production.length; ++i) {
+                const token = production[i]
+                if(!nullable.get(token))
+                    continue LOOP
+            }
+            if(!nullable.get(nonTerminal)) {
+                // need to set with true
+                nullable.set(nonTerminal, true)
+                needIteration = true
+            }
+        }
+    }
+
+    // compute 'first'
+    needIteration = true
+    while(needIteration) {
+        needIteration = false
+        for(const production of productions) {
+            const nonTerminal = production[0]
+            for(let i = 2; i < production.length; ++i) {
+                const token = production[i]
+                const sizeBeforeUnion = first.get(nonTerminal).size
+                unionSet(first.get(nonTerminal), first.get(token))
+                const sizeAfterUnion = first.get(nonTerminal).size
+                if(sizeBeforeUnion !== sizeAfterUnion)
+                    needIteration = true
+                if(!nullable.get(token))
+                    break
+            }
+        }
+    }
+
+    // compute 'follow'
+    follow.set('S\'', new Set(['$']))
+    needIteration = true
+    while(needIteration) {
+        needIteration = false
+        for(const production of productions) {
+            const nonTerminal = production[0]
+            // compute from parent to child
+            for(let i = production.length - 1; i > 1; --i) {
+                const token = production[i]
+                const sizeBeforeUnion = follow.get(token).size
+                unionSet(follow.get(token), follow.get(nonTerminal))
+                const sizeAfterUnion = follow.get(token).size
+                if(sizeBeforeUnion !== sizeAfterUnion)
+                    needIteration = true
+                if(!nullable.get(token))
+                    break
+            }
+            // compute between siblings
+            for(let i = 2; i < production.length - 1; ++i) {
+                const elderToken = production[i]
+                for(let j = i + 1; j < production.length; ++j) {
+                    const youngerToken = production[j]
+                    const sizeBeforeUnion = follow.get(elderToken).size
+                    unionSet(follow.get(elderToken), first.get(youngerToken))
+                    const sizeAfterUnion = follow.get(elderToken).size
+                    if(sizeBeforeUnion !== sizeAfterUnion)
+                        needIteration = true
+                    if(!nullable.get(youngerToken))
+                        break;
+                }
+            }
+        }
+    }
+
+    return { nullable, first, follow }
+}
+
+export { computeAutomation, computeParseTable, computeFirstFollow }
