@@ -98,4 +98,56 @@ const computeAutomation = (grammar) => {
     return { nodes, edges }
 }
 
-export { computeAutomation }
+const computeParseTable = (grammar, automation) => {
+    // 'grammar': { productions: String[][], productionMap: Map<String, Number[]>, terminalSet: Set<String> }
+    // 'automation': { 
+    //     nodes: { productionIndex: Number, dotIndex: Number }[][], 
+    //     edges: { sourceIndex: Number, targetIndex: Number, label: String }[]
+    // }
+
+    const { productions, terminalSet } = grammar
+    const { nodes, edges } = automation
+    const parseTable = []
+
+    // initialize 'parseTable'
+    for(let i = 0; i < nodes.length; ++i) {
+        // I would like to name the property with 'stateId' at first
+        // howerve, I can not assert that user would not input above token in the grammar
+        // therefore, I rename that property with 'S\''
+        // since we never shift augmented start symbol
+        parseTable.push({ 'S\'': `q${i}` })
+    }
+
+    // add shift/goto action into 'parseTable'
+    for(const { sourceIndex, targetIndex, label } of edges) {
+        if(terminalSet.has(label)) 
+            parseTable[sourceIndex][label] = `s${targetIndex}`
+        else
+            parseTable[sourceIndex][label] = `g${targetIndex}`
+    }
+
+    // add reduce action into 'parseTable'
+    for(const nodeIndex in nodes) {
+        for(const { productionIndex, dotIndex } of nodes[nodeIndex]) {
+            if(productions[productionIndex].length === dotIndex) {
+                if(productionIndex === 0) {
+                    // no need to reduce by S' ::= S
+                    parseTable[nodeIndex]['$'] = 'acc'
+                }
+                else {
+                    for(const terminal of terminalSet) {
+                        // check whether the conflict occurs
+                        if(typeof(parseTable[nodeIndex][terminal]) === 'string') 
+                            parseTable[nodeIndex][terminal] += `/r${productionIndex}`
+                        else 
+                            parseTable[nodeIndex][terminal] = `r${productionIndex}`
+                    }
+                }
+            }
+        }
+    }
+
+    return parseTable
+}
+
+export { computeAutomation, computeParseTable }

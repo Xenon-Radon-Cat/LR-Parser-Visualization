@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react'
 import './index.css'
-import { computeAutomation } from './compute'
+import { computeAutomation, computeParseTable } from './compute'
 import { InputGrammar } from './InputGrammar'
 import { Automation } from './Automation'
-
+import { ParseTable } from './ParseTable'
 
 export const LRgramma = () => {
     const [grammar, setGrammar] = useState({
@@ -21,25 +21,29 @@ export const LRgramma = () => {
             ['S', [1, 2]],
             ['L', [3, 4]],
         ]),
-        terminalSet: new Set(['$', '(', ')', 'x', ';'])
+        terminalSet: new Set(['(', ')', 'x', ';', '$'])
     })
     const [automation, setAutomation] = useState(null)
+    const [parseTable, setParseTable] = useState(null)
 
 
     const grammarUpdated = (grammar) => {
         const automation = computeAutomation(grammar)
+        const parseTable = computeParseTable(grammar, automation)
         setGrammar(grammar)
         setAutomation(automation)
+        setParseTable(parseTable)
     }
 
-    if(automation === null)
-        setAutomation(computeAutomation(grammar))
+    if(automation === null || parseTable === null) 
+        grammarUpdated(grammar)
 
     return (
         <div className='LRGrammar'>
             <h1 className='header'> SLR Parser Visualization</h1>
             <InputGrammar  grammarUpdated={grammarUpdated}/>  
             <Automation grammar={grammar} automation={automation}/>
+            <ParseTable grammar={grammar} parseTable={parseTable}/>
         </div>
     )
 }
