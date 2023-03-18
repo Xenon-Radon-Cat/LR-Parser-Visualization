@@ -98,15 +98,21 @@ const computeAutomation = (grammar) => {
     return { nodes, edges }
 }
 
-const computeParseTable = (grammar, automation) => {
+const computeParseTable = (grammar, automation, firstFollow) => {
     // 'grammar': { productions: String[][], productionMap: Map<String, Number[]>, terminalSet: Set<String> }
     // 'automation': { 
     //     nodes: { productionIndex: Number, dotIndex: Number }[][], 
     //     edges: { sourceIndex: Number, targetIndex: Number, label: String }[]
     // }
+    // 'firstFollow': {
+    //     nullable: Map<String, Bool>,
+    //     first: Map<String, Set<String>>,
+    //     follow: Map<String, Set<String>>
+    // }
 
     const { productions, terminalSet } = grammar
     const { nodes, edges } = automation
+    const { follow } = firstFollow
     const parseTable = []
 
     // initialize 'parseTable'
@@ -135,7 +141,8 @@ const computeParseTable = (grammar, automation) => {
                     parseTable[nodeIndex]['$'] = 'acc'
                 }
                 else {
-                    for(const terminal of terminalSet) {
+                    const nonTerminal = productions[productionIndex][0]
+                    for(const terminal of follow.get(nonTerminal)) {
                         // check whether the conflict occurs
                         if(typeof(parseTable[nodeIndex][terminal]) === 'string') 
                             parseTable[nodeIndex][terminal] += `/r${productionIndex}`

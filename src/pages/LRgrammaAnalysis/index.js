@@ -24,18 +24,18 @@ export const LRgramma = () => {
         terminalSet: new Set(['(', ')', 'x', ';', '$'])
     })
     const [automation, setAutomation] = useState(null)
-    const [parseTable, setParseTable] = useState(null)
     const [firstFollow, setFirstFollow] = useState(null)
+    const [parseTable, setParseTable] = useState(null)
 
 
     const grammarUpdated = (grammar) => {
         const automation = computeAutomation(grammar)
-        const parseTable = computeParseTable(grammar, automation)
         const firstFollow = computeFirstFollow(grammar)
+        const parseTable = computeParseTable(grammar, automation, firstFollow)
         setGrammar(grammar)
         setAutomation(automation)
-        setParseTable(parseTable)
         setFirstFollow(firstFollow)
+        setParseTable(parseTable)
     }
 
     if(automation === null) 
