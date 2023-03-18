@@ -52,14 +52,15 @@ export const InputGrammar = (props) => {
         }
 
         // collect terminals from 'productions'
-        const terminalSet = new Set(['$'])
+        const terminalSet = new Set()
         for(const production of productions) {
-            for(let i = production.length - 1; i > 1; --i) {
+            for(let i = 2; i < production.length; ++i) {
                 const token = production[i]
                 if(!productionMap.has(token))
                     terminalSet.add(token)
             }
         }
+        terminalSet.add('$')
         
         // update grammar
         grammarUpdated({ productions, productionMap, terminalSet })
