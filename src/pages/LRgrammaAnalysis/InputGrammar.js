@@ -1,17 +1,69 @@
 // component for users to writer their SLR grammar
 
 import React, { useState } from 'react'
-import { Input, Button, Row, Col} from 'antd';
-import { useDispatch } from 'react-redux';
-import { grammarUpdated } from './grammarSlice';
+import { Input, Button, Row, Col} from 'antd'
 
-const { TextArea } = Input;
+const { TextArea } = Input
 
-export const InputGrammar = () => {
-    const initialText = 'S ::= ( L )\nS ::= x\nL ::= S\nL ::= L ; S'
-    const [text, setText] = useState(initialText)
+export const InputGrammar = (props) => {
+    const [text, setText] = useState('S ::= ( L )\nS ::= x\nL ::= S\nL ::= L ; S')
+    const { grammarUpdated } = props
+    
     const onTextChange = (e) => setText(e.target.value)
-    const dispatch = useDispatch()
+    const onButtonClick = () => {
+        const productions = [['S\'', '::=', '']]
+
+        for(const line of text.trim().split(/\n+/)) {
+            const production = line.trim().split(/\s+/)
+            // validate 'prodution'
+            if(production[0] === '') {
+                // skip empty line
+                continue
+            }
+            if(production.length < 2 || production[1] !== '::=') {
+                alert('please use correct expand symbol ::=')
+                return
+            }
+            for(const token of production) {
+                if(token === '$' || token === 'S\'') {
+                    alert('please do not use reserve symbol like $ and S\'')
+                    return
+                }
+            }
+            productions.push(production)
+        }
+
+        // check whether 'productions' is empty
+        if(productions.length === 1) {
+            alert('please input your grammar first')
+            return
+        }
+            
+        // write back start symbol into augmented production
+        productions[0][2] = productions[1][0]
+
+        // classify 'productions' by non-terminal
+        const productionMap = new Map()
+        for(const productionIndex in productions) {
+            const nonTerminal = productions[productionIndex][0]
+            if(!productionMap.has(nonTerminal))
+                productionMap.set(nonTerminal, [])
+            productionMap.get(nonTerminal).push(Number(productionIndex))
+        }
+
+        // collect terminals from 'productions'
+        const terminalSet = new Set(['$'])
+        for(const production of productions) {
+            for(let i = production.length - 1; i > 1; --i) {
+                const token = production[i]
+                if(!productionMap.has(token))
+                    terminalSet.add(token)
+            }
+        }
+        
+        // update grammar
+        grammarUpdated({ productions, productionMap, terminalSet })
+    }
 
     return (
         <div className='InputGrammar'>
@@ -32,7 +84,7 @@ export const InputGrammar = () => {
                     </div>
                 </Col>
             </Row>
-            <Button type='primary' className='Button' size='large' onClick={() => dispatch(grammarUpdated(text))}>Generate LR(0) Automation</Button>
+            <Button type='primary' className='Button' size='large' onClick={onButtonClick}>Generate LR(0) Automation</Button>
         </div>
     )
 }
