@@ -44,3 +44,37 @@
 .InputGrammar Button {
     margin-top: 2%;
 }
+
+
+.ParseExpression {
+    text-align: left;
+}
+
+.ParseExpression .InputCard {
+    margin: 2.5% auto;
+    font-size: 120%;
+    font-weight: 400;
+}
+
+.ParseExpression .InputCard.bottom {
+    margin-bottom: -2%;
+}
+
+.ParseExpression .InputCard span {
+    color: #777;
+    line-height: 1.6;
+}
+
+.ParseExpression .InputCard input {
+    margin: 2.5% auto;
+    color: rgb(120, 120, 120);
+}
+
+
+
+.ParseExpression h3 {
+    margin: 1% auto;
+    font-size: 150%;
+    font-weight: 600;
+    color: rgb(75, 75, 75);
+}
