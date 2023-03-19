@@ -52,7 +52,7 @@ export const Automation = (props) => {
 
     return (
         <div>
-            <h2 className='header'>2.LR(0) Automation</h2>
+            <h2 className='header'>2.&nbsp;LR(0) Automation</h2>
             <Graphviz dot={dot} options={{width: "100%", height: null}}></Graphviz>
         </div>
     )
