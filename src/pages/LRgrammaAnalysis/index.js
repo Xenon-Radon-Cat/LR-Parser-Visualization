@@ -6,6 +6,7 @@ import { computeAutomation, computeParseTable, computeFirstFollow } from './comp
 import { InputGrammar } from './InputGrammar'
 import { Automation } from './Automation'
 import { ParseTable } from './ParseTable'
+import { ParseExpression } from './ParseExpression'
 
 export const LRgramma = () => {
     const [grammar, setGrammar] = useState({
@@ -47,6 +48,7 @@ export const LRgramma = () => {
             <InputGrammar  grammarUpdated={grammarUpdated}/>  
             <Automation grammar={grammar} automation={automation}/>
             <ParseTable grammar={grammar} firstFollow={firstFollow} parseTable={parseTable}/>
+            <ParseExpression grammar={grammar} parseTable={parseTable}/>
         </div>
     )
 }
