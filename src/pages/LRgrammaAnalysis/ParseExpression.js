@@ -1,3 +1,5 @@
+// component to parse the expression and render the parse tree
+
 import React, { useRef, useState } from "react"
 import { Row, Col, Button, Input, Space } from 'antd'
 import Graphviz from "graphviz-react"
@@ -12,7 +14,9 @@ export const ParseExpression = (props) => {
     const [lastAction, setLastAction] = useState('')
     const [dot, setDot] = useState('')
 
-    const parseStackRef = useRef([{label: '', state: 0, nodeIndex: -1}])
+    const parseStackRef = useRef([{ label: '', state: 0, nodeIndex: -1 }])
+    const dotLinesRef = useRef([]) // (nodeStmt | edgeStmt)[]
+    const nodesRef = useRef([]) // { nodeLineNumber: Number, edgeLineNumbers: Number[] }
 
     const onTextChange = (e) => setText(e.target.value)
     const onStartClick = () => {
@@ -33,17 +37,23 @@ export const ParseExpression = (props) => {
             }
         }
         
-        // initialize
+        // initialize 'dotLines', 'nodes' and 'parseStack'
         remainingInput.push('$')
+        computeParseTreeInAdvance(remainingInput)        
+        parseStackRef.current.length = 1
+
+        // initialize all the state
         setRemainingInput(remainingInput)
         setStart(true)
         setLastAction('')
-        setDot('')
-        parseStackRef.current.length = 1
+        setDot(dotLinesRef.current.join(''))
     }
+
     const onStepClick = () => {
-        const token = remainingInput[0]
         const parseStack = parseStackRef.current
+        const dotLines = dotLinesRef.current
+        const nodes = nodesRef.current
+        const token = remainingInput[0]
         const currentState  = parseStack[parseStack.length - 1].state
         const action = parseTable[currentState][token]
         
@@ -69,33 +79,87 @@ export const ParseExpression = (props) => {
             return
         }
 
-        const nodeIndex = parseStack[parseStack.length - 1].nodeIndex  + 1 // 'nodeIndex' is the index of tree node created later
-        let nextDot = dot
+        // 'nodeIndex' is the index of tree node created later
+        const nodeIndex = parseStack[parseStack.length - 1].nodeIndex  + 1
 
         if(action[0] === 's') {
+            // shift and make the node visible
+            const lineNumber = nodes[nodeIndex].nodeLineNumber
             parseStack.push({ label: token, state: number, nodeIndex })
-            nextDot += `${nodeIndex} [label="${token}"];`
+            dotLines[lineNumber] = dotLines[lineNumber].replace('[style="invis"]', '')
             setRemainingInput(remainingInput.slice(1))
             setLastAction(`shift ${token}`)
-            setDot(nextDot)
+            setDot(dotLines.join(''))
         }
         else {
+            // reduce and make the node and edges visible
             const production = productions[number]
-            const popCount = production.length - 2
             const nonTerminal = production[0]
-            
-            nextDot += `${nodeIndex} [label="${nonTerminal}"];`
-            for(let i = 0; i < popCount; ++i) {
-                const childNodeIndex = parseStack.pop().nodeIndex
-                nextDot += `${nodeIndex} -- ${childNodeIndex};`
-            }
+            const popCount = production.length - 2
+            const { nodeLineNumber, edgeLineNumbers } = nodes[nodeIndex]
+
+            parseStack.length -= popCount
+            dotLines[nodeLineNumber] = dotLines[nodeLineNumber].replace('[style="invis"]', '')
+            for(const edgeLineNumber of edgeLineNumbers)
+                dotLines[edgeLineNumber] = dotLines[edgeLineNumber].replace('[style="invis"]', '')
 
             const stateAfterPop = parseStack[parseStack.length - 1].state
             const nextState = Number(parseTable[stateAfterPop][nonTerminal].slice(1))
             parseStack.push({ label: nonTerminal, state: nextState, nodeIndex })
 
             setLastAction(`reduce by ${production.join(' ')}`)
-            setDot(nextDot)
+            setDot(dotLines.join(''))
+        }
+    }
+
+    const computeParseTreeInAdvance = (tokens) => {
+        // compute the dot language about parse tree but set all nodes and edges invisible 
+        const parseStack = [{ label: '', state: 0, nodeIndex: -1 }]
+        const dotLines = dotLinesRef.current
+        const nodes = nodesRef.current
+        dotLines.length = nodes.length = 0
+
+        for(let tokenIndex = 0, nodeIndex = 0; ; ++nodeIndex) {
+            const token = tokens[tokenIndex]
+            const currentState = parseStack[parseStack.length - 1].state
+            const action = parseTable[currentState][token]
+
+            // check whether the action is valid or 'accept'
+            if(typeof(action) !== 'string' || action[0] === 'g' || action === 'acc')
+                break
+
+            // check whether the conflict occurs
+            const number = Number(action.slice(1))
+            if(isNaN(number))
+                break
+
+            if(action[0] === 's') {
+                // shift
+                dotLines.push(`${nodeIndex} [label="${token}"] [style="invis"];`)
+                nodes.push({ nodeLineNumber: dotLines.length - 1 , edgeLineNumbers: [] })
+                parseStack.push({ label: token, state: number, nodeIndex })
+                ++tokenIndex
+            }
+            else {
+                // reduce
+                const production = productions[number]
+                const nonTerminal = production[0]
+                const popCount = production.length - 2
+                const nodeLineNumber = dotLines.length
+                const edgeLineNumbers = []
+
+                dotLines.push(`${nodeIndex} [label="${nonTerminal}"] [style="invis"];`)
+                for(let i = 0; i < popCount; ++i) {
+                    const childNodeIndex = parseStack.pop().nodeIndex
+                    dotLines.push(`${nodeIndex} -- ${childNodeIndex} [style="invis"]`)
+                    edgeLineNumbers.push(dotLines.length - 1)
+                }
+                nodes.push({ nodeLineNumber, edgeLineNumbers })
+
+                const stateAfterPop = parseStack[parseStack.length - 1].state
+                const nextState = Number(parseTable[stateAfterPop][nonTerminal].slice(1))
+                parseStack.push({ label: nonTerminal, state: nextState, nodeIndex })
+            }
         }
     }
 
@@ -128,6 +192,4 @@ export const ParseExpression = (props) => {
             </Row>
         </div>
     )
-
-
 }
