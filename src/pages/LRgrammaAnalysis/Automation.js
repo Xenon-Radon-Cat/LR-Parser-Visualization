@@ -9,14 +9,12 @@ export const Automation = (props) => {
     const { nodes, edges } = automation
 
     // add the prologue
-    let dot = 'digraph {\nrankdir=LR\n'
+    let dot = 'digraph { rankdir=LR;'
 
     // add node statement list
     for(const nodeIndex in nodes) {
-        // add node identifier
-        dot += nodeIndex
-        // add the prologue of attribute list
-        dot += ` [label="q${nodeIndex}\n`
+        // add node identifier and the prologue of attribute list
+        dot += `${nodeIndex} [label="q${nodeIndex}\n`
         // add the productions
         for(const { productionIndex, dotIndex } of nodes[nodeIndex]) {
             const production = productions[productionIndex]
@@ -29,22 +27,16 @@ export const Automation = (props) => {
             for(let i = dotIndex; i < production.length; ++i)
                 dot += production[i]
             // add the newline
-            dot += '\\n'
+            dot += '\n'
         }
         // add the epilog of attribute list
-        dot += '"];\n';
+        dot += '"];';
     }
 
     // add edge statement list
     for(const { sourceIndex, targetIndex, label } of edges) {
-        // add the edge
-        dot += sourceIndex
-        dot += ' -> '
-        dot += targetIndex
-        // add the label
-        dot += ' [label="'
-        dot += label
-        dot += '"];\n';
+        // add the edge and the label
+        dot += `${sourceIndex} -> ${targetIndex} [label="${label}"];`
     }
 
     // add the epilog
