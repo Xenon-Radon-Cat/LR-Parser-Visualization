@@ -44,7 +44,7 @@ export const ParseTable = (props) => {
 
     return (
         <div>
-        <h2 className='header'>3.&nbsp;Table</h2>
+        <h2 className='header'>3. Table</h2>
         <Row>
             <Col span={7}>
                 <Table dataSource={firstFollowDatasource} columns={firstFollowColumns} bordered={true} 

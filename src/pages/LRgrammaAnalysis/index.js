@@ -44,7 +44,7 @@ export const LRgramma = () => {
 
     return (
         <div className='LRGrammar'>
-            <h1 className='header'> SLR Parser Visualization</h1>
+            <h1 className='header'>SLR Parser Visualization</h1>
             <InputGrammar  grammarUpdated={grammarUpdated}/>  
             <Automation grammar={grammar} automation={automation}/>
             <ParseTable grammar={grammar} firstFollow={firstFollow} parseTable={parseTable}/>
