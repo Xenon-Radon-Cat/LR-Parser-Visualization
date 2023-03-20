@@ -80,7 +80,8 @@ export const InputGrammar = (props) => {
                             <li>The non-terminal on the left-hand-side of the first rule is the start non-terminal</li>
                             <li>Write each production rule in a separate line (see example to the left)</li>
                             <li>Separate each token using whitespace</li>
-                            <li>$ is reserved as the end-of-input symbol, and S' is reserved as an artificial start symbol. The grammar is automatically augmented with the rule S' ::= start $</li>
+                            <li>Write the empty production rule like E ::= </li>
+                            <li>$ is reserved as the end-of-input symbol, and S' is reserved as an artificial start symbol. The grammar is automatically augmented with the rule S' ::= start </li>
                         </ul>
                     </div>
                 </Col>
