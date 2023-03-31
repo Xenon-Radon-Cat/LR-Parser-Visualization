@@ -1,35 +1,54 @@
 // top-level component of SLR Parser Visualization
 
-import React from 'react';
-import { Col, Row} from 'antd';
-import { InputGrammar } from './InputGrammar';
+import React, { useState } from 'react'
 import './index.css'
-import { Provider } from 'react-redux'
-import store from './store'
+import { computeAutomation, computeParseTable, computeFirstFollow } from './compute'
+import { InputGrammar } from './InputGrammar'
+import { Automation } from './Automation'
+import { ParseTable } from './ParseTable'
+import { ParseExpression } from './ParseExpression'
 
-export const LRgramma = () => (
-    <div className='LRGrammar'>
-        <Provider store={store}>
-        <h1 className='header'> SLR Parser Visualization</h1>
-        <InputGrammar/>
-        {/*
-        <Row>
-            <Col span={12}>
-                Parse Table
-            </Col>
-            <Col span={12}>
-                Automation
-            </Col>
-        </Row>
-        <Row>
-            <Col span={12}>
-                Parse Expression
-            </Col>
-            <Col span={12}>
-                Parse Tree
-            </Col>
-        </Row>
-        */}
-        </Provider>
-    </div>
-)
+export const LRgramma = () => {
+    const [grammar, setGrammar] = useState({
+        productions: [
+            ['S\'', '::=', 'S'],
+            ['S', '::=', '(', 'L', ')'],
+            ['S', '::=', 'x'],
+            ['L', '::=', 'S'],
+            ['L', '::=', 'L', ';', 'S']
+        ],
+        productionMap: new Map([
+            ['S\'', [0]],
+            ['S', [1, 2]],
+            ['L', [3, 4]],
+        ]),
+        terminalSet: new Set(['(', ')', 'x', ';', '$'])
+    })
+    const [automation, setAutomation] = useState(null)
+    const [firstFollow, setFirstFollow] = useState(null)
+    const [parseTable, setParseTable] = useState(null)
+
+
+    const grammarUpdated = (grammar) => {
+        const automation = computeAutomation(grammar)
+        const firstFollow = computeFirstFollow(grammar)
+        const parseTable = computeParseTable(grammar, automation, firstFollow)
+        setGrammar(grammar)
+        setAutomation(automation)
+        setFirstFollow(firstFollow)
+        setParseTable(parseTable)
+    }
+
+    if(automation === null) 
+        grammarUpdated(grammar)
+
+    return (
+        <div className='LRGrammar'>
+            <h1 className='header'>SLR Parser Visualization</h1>
+            <InputGrammar  grammarUpdated={grammarUpdated}/>  
+            <Automation grammar={grammar} automation={automation}/>
+            <ParseTable grammar={grammar} firstFollow={firstFollow} parseTable={parseTable}/>
+            <ParseExpression grammar={grammar} parseTable={parseTable}/>
+        </div>
+    )
+}
