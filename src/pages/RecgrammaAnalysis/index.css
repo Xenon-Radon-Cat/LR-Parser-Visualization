@@ -47,4 +47,9 @@
         width: 100vw;
     }
   }
+.language {
+    position: absolute;
+    left: 100%;
+    transform: translateX(-100px)  translateY(-30px);
+}
 

@@ -1,38 +1,47 @@
-import { Input, Button, List, Table } from 'antd';
-import { Item } from 'rc-menu';
+import { Input, Button, List, Table, notification, Select, Space } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { Prod, LL1 } from './util.js';
-
+import { RenderTree } from './util.js';
+import { useTranslation } from 'react-i18next';
+import './index.css';
 const { TextArea } = Input;
 
 export function Recgramma() {
+    const { t, i18n } = useTranslation();
     const [G, setG] = useState('');
     const [str, setStr] = useState('');
     const [firstfollow, setFirstFollow] = useState();
     const [columns, setColumns] = useState([]);
     const [select, setSelect] = useState([]);
     const [stack, setStack] = useState([]);
-   
+    const [buttonMes, setButtonMes] = useState(t("next step"));
+    const [api, contextHolder] = notification.useNotification();
+
 
     let LL = useRef(new LL1());
+    useEffect(() => {
+        if (t("Welcome to React") === "Welcome to React and react-i18next") {
+        }
+    }, [t])
     const stepColumns = [
         {
-            title:'stack',
-            dataIndex:'gra',
-            key:'stack'
+            title: 'stack',
+            dataIndex: 'gra',
+            key: 'stack'
         },
         {
-            title:'input',
+            title: 'input',
             dataIndex: 'str',
-            key:'input',
+            key: 'input',
         },
         {
-            title:'production',
-            dataIndex:'production',
-            key:'production'
+            title: 'production',
+            dataIndex: 'production',
+            key: 'production'
         }
     ]
     function startAnalysis() {
+        LL.current.reset();
         if (G === '') return;
         let arr = G.split('\n');
         let g = arr.map((item) => new Prod(item));
@@ -71,6 +80,7 @@ export function Recgramma() {
                 key: value,
             })
         })
+
         setColumns(title);
         const data = [];
         LL.current.VN.forEach((value) => {
@@ -78,6 +88,7 @@ export function Recgramma() {
                 key: value
             })
         })
+
         LL.current.M.forEach((value, key) => {
             let keys = key.split(',');
             data.map((item) => {
@@ -89,10 +100,26 @@ export function Recgramma() {
         setSelect(data)
 
     }
+
     function nextStep() {
-        //if(str.length === 0) return;
-        console.log(LL.current.VN, 78797)
-        let h = str.length === 1? LL.current.match(str) : LL.current.match(str.split(""));
+        let isend = true;
+        stack.length && stack[stack.length - 1].gra.forEach((s) => {
+            if (LL.current.VN.has(s)) {
+                isend = false;
+            }
+        })
+        if (str[0] === '#' && isend) {
+            api.info({
+                message: `Notification 已分析结束`,
+                placement: 'topRight',
+            });
+            setButtonMes('重来');
+            return;
+        }
+      //  console.log(LL.current.VN, 78797)
+        let n = str.length === 1 ? [str] : str.split("");
+        if (n[n.length - 1] !== '#') n.push('#')
+        let h = LL.current.match(n);
         if (h.length <= 1) {
             setStr(h)
         } else {
@@ -105,40 +132,93 @@ export function Recgramma() {
             production: LL.current.production,
         }
         setStack([...stack, temp]);
-     //   console.log(LL.current.gra, h, 89898)
+        console.log(LL.current.root, 'root')
+        RenderTree(LL.current.root);
     }
+
+    function reset() {
+        setFirstFollow('');
+        setColumns('');
+        setSelect('');
+        setStack('');
+        setStr('');
+        LL = new LL1();
+        setButtonMes('下一步');
+    }
+
+    function handleChange(value) {
+        i18n.changeLanguage(value);
+    }
+
+    function addAutoGra() {
+        setG(`E->TG\nG->+TG|@\nT->FY\nY->*FY|@\nF->(E)|i`);
+    }
+
     return (
         <div>
-            <div>可视递归下降分析</div>
-            <div>
-                <div>
-                    <p>输入文法</p>
-                    <TextArea rows={4} onChange={(e) => setG(e.target.value)} />
-                    <p>输入产生式</p>
-                    <TextArea rows={4} onChange={(e) => setStr(e.target.value)} />
-                    <Button onClick={startAnalysis}>开始分析</Button>
+            {contextHolder}
+            <div className='title'>{t("Visual Recursive Descent Analysis")}
+                <div className='language'>
+                    <Select
+                        style={{
+                            width: 120,
+                        }}
+                        onChange={handleChange}
+                        options={[
+                            {
+                                value: 'zh',
+                                label: t("zh"),
+                            },
+                            {
+                                value: 'en',
+                                label: t("en"),
+                            },
+                        ]}
+                    />
                 </div>
-                <div>
+            </div>
+            <div className='body'>
+
+                <div className='input'>
+                    <p>{t('input grammar')}</p>
+                    <TextArea value={G} rows={4} onChange={(e) => setG(e.target.value)} />
+                    <Button onClick={addAutoGra}>{`
+                        E->TG\n
+                        G->+TG|@\n
+                        T->FY\n
+                        Y->*FY|@\n
+                        F->(E)|i`}
+                    </Button>
+                    <p>{t("input production")}</p>
+                    <TextArea rows={4} value={str} onChange={(e) => setStr(e.target.value)} />
+                    <div className='button'><Button type="primary" onClick={startAnalysis}>{t("start analysis")}</Button></div>
+                </div>
+                <div className='firstfollow'>
                     <List
-                        header={<div>first&follow</div>}
+                        header={<div>{t("first&follow")}</div>}
                         bordered
                         dataSource={firstfollow}
                         renderItem={(item) => <List.Item>{item}</List.Item>}
                     />
                 </div>
-                <div>
-                    <p>预测分析表</p>
+
+            </div>
+            <div className='table'>
+                <div className='predictTable'>
+                    <p>{t("Predictive analysis table")}</p>
                     <Table columns={columns} dataSource={select} />;
                 </div>
-                <div>
-                    递归分析步骤
+                <div className='recursionTable'>
+                    {t("recursive analysis step")}
                     <div>
-                        <Button onClick={nextStep}>下一步</Button>
+                        <Button type='primary' onClick={buttonMes === '重来' ? reset : nextStep}>{buttonMes}</Button>
                         <Table columns={stepColumns} dataSource={stack} />;
                     </div>
                 </div>
             </div>
+            <div id="container">
 
+            </div>
         </div>
     )
 }

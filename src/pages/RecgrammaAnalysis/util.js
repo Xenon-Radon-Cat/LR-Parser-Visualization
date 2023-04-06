@@ -54,6 +54,18 @@ export class LL1 {
         this.production = '';
         this.root = new Node();
     }
+    reset(){
+        this.FIRST = new Map();
+        this.FOLLOW = new Map();
+        this.G = [];
+        this.VN = new Set(); //非终结符
+        this.VT = new Set(); //终结符
+        this.M = new Map();
+        this.gra = [];
+        this.production = '';
+        this.root = new Node();
+
+    }
     addProd(prod) {
         if (prod.isValid) {
             const g = this.G.find((item) => item.noTerminal === prod.noTerminal)
@@ -74,14 +86,24 @@ export class LL1 {
     }
 
     isLeftRecursive() {
+        let res = [];
         for(let rule of this.G){
             for(let sel of rule.selection){
                 if(rule.noTerminal === sel[0]){
-                    return true;
+                   for(let m of rule.selection){
+                    if(rule.noTerminal !== m[0]){
+                        res.push(`${rule.noTerminal} -> ${m}${rule.noTerminal}'`); 
+                    }else{
+                        res.push(`${rule.noTerminal}' -> ${m.splice(0,1)}${rule.noTerminal}'` );
+                    }
+                   }
+                   res.push(`${rule.noTerminal}' -> @`);
+                   console.log(res);
+                    return res;
                 }
             }
         }
-        return false;
+        return res;
     }
 
     isCFG() {
@@ -420,11 +442,12 @@ function treenode(place, value) {
 
 let n = new LL1();
 let m = [
-    'E->TG',
-    'G->+TG|@',
-    'T->FY',
-    'Y->*FY|@',
-    'F->(E)|i'
+    // 'E->TG',
+    // 'G->+TG|@',
+    // 'T->FY',
+    // 'Y->*FY|@',
+    // 'F->(E)|i'
+    
 ]
 let g = m.map((item) => new Prod(item));
 g.forEach((item) => n.addProd(item));
