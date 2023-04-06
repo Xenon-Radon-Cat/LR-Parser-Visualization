@@ -1,0 +1,80 @@
+/* style for SLR Parser Visualization */
+
+.LRGrammar {
+    font-family: Helvetica, Arial, sans-serif;
+    padding: 2.5%;
+}
+
+.LRGrammar > .header {
+    text-align: center;
+    font-size: 300%;
+    font-weight: 100;
+    color: rgb(75, 75, 75);
+    margin: 0 auto;
+}
+
+.InputGrammar {
+    text-align: left;
+}
+
+
+.header {
+    text-align: left;
+    font-weight: 300;
+    color: #888;
+}
+
+.InputGrammar .TextArea {
+    font-size: 120%;
+    color: rgb(120, 120, 120);
+}
+
+.InputGrammar h3 {
+    font-size: 130%;
+    font-weight: 600;
+    color: rgb(75, 75, 75);
+}
+
+.InputGrammar li {
+    font-size: 125%;
+    color: #777;
+    line-height: 1.6;
+}
+
+.InputGrammar Button {
+    margin-top: 2%;
+}
+
+
+.ParseExpression {
+    text-align: left;
+}
+
+.ParseExpression .InputCard {
+    margin: 2.5% auto;
+    font-size: 120%;
+    font-weight: 400;
+}
+
+.ParseExpression .InputCard.bottom {
+    margin-bottom: -2%;
+}
+
+.ParseExpression .InputCard span {
+    color: #777;
+    line-height: 1.6;
+}
+
+.ParseExpression .InputCard input {
+    margin: 2.5% auto;
+    color: rgb(120, 120, 120);
+}
+
+
+
+.ParseExpression h3 {
+    margin: 1% auto;
+    font-size: 150%;
+    font-weight: 600;
+    color: rgb(75, 75, 75);
+}
