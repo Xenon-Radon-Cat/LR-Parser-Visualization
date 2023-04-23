@@ -4,10 +4,16 @@ import { Prod, LL1 } from './util.js';
 import { RenderTree } from './util.js';
 import { useTranslation } from 'react-i18next';
 import './index.css';
+
+
 const { TextArea } = Input;
 
+
 export function Recgramma() {
-    const { t, i18n } = useTranslation();
+ //   const { t, i18n } = useTranslation();
+ function t (str){
+    return str;
+ }
     const [G, setG] = useState('');
     const [str, setStr] = useState('');
     const [firstfollow, setFirstFollow] = useState();
@@ -48,6 +54,17 @@ export function Recgramma() {
         g.forEach((item) => {
             LL.current.addProd(item);
         });
+        const h = LL.current.isLeftRecursive();
+        console.log(232,h)
+        if(h){
+            api.info({
+                message: `文法左递归可修改成${h}`,
+                placement: 'topRight',
+            });
+        }
+        const isIndirect = LL.current.hasIndirectLeftRecursion();
+        console.log(isIndirect,43434);
+        
         arr.forEach((item) => {
             LL.current.first(item);
         })
@@ -146,9 +163,9 @@ export function Recgramma() {
         setButtonMes('下一步');
     }
 
-    function handleChange(value) {
-        i18n.changeLanguage(value);
-    }
+    // function handleChange(value) {
+    //     i18n.changeLanguage(value);
+    // }
 
     function addAutoGra() {
         setG(`E->TG\nG->+TG|@\nT->FY\nY->*FY|@\nF->(E)|i`);
@@ -163,7 +180,7 @@ export function Recgramma() {
                         style={{
                             width: 120,
                         }}
-                        onChange={handleChange}
+                    //    onChange={handleChange}
                         options={[
                             {
                                 value: 'zh',
@@ -227,4 +244,5 @@ export function Recgramma() {
 // G->+TG|@
 // T->FY
 // Y->*FY|@
-// F->(E)|i
+// F->(E)
+// F->i

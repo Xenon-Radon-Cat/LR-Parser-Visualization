@@ -87,23 +87,80 @@ export class LL1 {
 
     isLeftRecursive() {
         let res = [];
+        let temp = [];
+        let isLeft = false;
         for(let rule of this.G){
             for(let sel of rule.selection){
                 if(rule.noTerminal === sel[0]){
+                    isLeft = true;
                    for(let m of rule.selection){
                     if(rule.noTerminal !== m[0]){
-                        res.push(`${rule.noTerminal} -> ${m}${rule.noTerminal}'`); 
+                        res.push(`${rule.noTerminal}->${m}${rule.noTerminal}'`); 
                     }else{
-                        res.push(`${rule.noTerminal}' -> ${m.splice(0,1)}${rule.noTerminal}'` );
+                        res.push(`${rule.noTerminal}'->${m.substring(1)}${rule.noTerminal}'|@` );
                     }
                    }
-                   res.push(`${rule.noTerminal}' -> @`);
+                  // res.push(`${rule.noTerminal}' -> @`);
                    console.log(res);
-                    return res;
+                   temp.push(rule.noTerminal);
+                   // return res;
+                }else {
+                   if(!temp.includes(rule.noTerminal)){
+                    let str = `${rule.noTerminal}->`;
+                      for(let m of rule.selection){
+                        if(str[str.length-1]==='>'){
+                            str+=`${m}`;
+                        }else{
+                            str+=`|${m}`
+                        } 
+                      }
+                      res.push(str);
+                      temp.push(rule.noTerminal);
+                   }
                 }
+              
             }
         }
+        if(!isLeft) return;
         return res;
+    }
+
+    hasIndirectLeftRecursion(){
+        const ruleMap = new Map();
+        for(let rule of this.G){
+            for(let sel of rule.selection){
+                console.log(8989897,rule,sel,this.G)
+                if(this.VN.has(sel[0])){
+                    ruleMap.set(rule.noTerminal,sel[0]);
+                }
+            }
+        };
+        console.log(898989,ruleMap)
+      for(let i = 0;i< this.VN;i++){
+        const A = this.VN[i];
+        for(let j = 0;j < i;j++){
+            const B = this.VN[j];
+            if(this.canExpandTo(B,A,ruleMap,new Set())){
+                return true;
+            }
+        }
+      }
+    }
+
+    canExpandTo(start, target, directMap, visited){
+        if(start === target){
+            return true;
+        }
+        if(visited.has(start)){
+            return false;
+        }
+        visited.add(start);
+        for(const nt of directMap[start]){
+            if(this.canExpandTo(nt,target,directMap,visited)){
+                return true;
+            }
+        }
+        return false;
     }
 
     isCFG() {
@@ -252,7 +309,6 @@ export class LL1 {
                 value.map((item) => {
                     n.children.push(new Node(item));
                 })
-                console.log(this.root, 'root')
                 for (let k in this.gra) {
                     if (this.gra[k] === item) {
                         this.gra.splice(k, 1);
@@ -283,6 +339,8 @@ export class LL1 {
             if (res) return res;
         }
     }
+
+
 }
 
 export class Node {
@@ -442,15 +500,20 @@ function treenode(place, value) {
 
 let n = new LL1();
 let m = [
+// 'E->E+T|T',
+// 'T->T*F|F',
+// 'F->（E）|I',
+
     // 'E->TG',
     // 'G->+TG|@',
     // 'T->FY',
     // 'Y->*FY|@',
-    // 'F->(E)|i'
-    
+    // 'F->(E)|i'    
 ]
 let g = m.map((item) => new Prod(item));
 g.forEach((item) => n.addProd(item));
+const k = n.isLeftRecursive();
+console.log(k);
 //console.log(434, n.VN, n.VT)
 let f = 'E->TG';
 m.forEach((item) => n.first(item));
@@ -459,3 +522,8 @@ n.follow();
 //console.log(n.FOLLOW, 'follow');
 n.parseTable();
 //console.log(n.M);
+// E→E+T/ T
+
+// T→T*F/ F
+
+// F→（E）/ I
