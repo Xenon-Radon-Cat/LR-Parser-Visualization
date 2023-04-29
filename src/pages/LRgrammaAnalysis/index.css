@@ -46,7 +46,7 @@
 }
 
 
-.ParseExpression {
+.ParseExpression, .Automation {
     text-align: left;
 }
 
@@ -71,10 +71,20 @@
 }
 
 
-
 .ParseExpression h3 {
     margin: 1% auto;
     font-size: 150%;
     font-weight: 600;
     color: rgb(75, 75, 75);
+}
+
+.Graphviz {
+    border-color: rgba(136,136,136, 0.25);
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 25px;
+}
+
+.Automation Button{
+    margin-top: 25%;
 }
