@@ -12,6 +12,7 @@ export const InputGrammar = (props) => {
     const onTextChange = (e) => setText(e.target.value)
     const onButtonClick = () => {
         const productions = [['S\'', '::=', '']]
+        const seen = new Set() // 'seen' traces the productions validated
 
         for(const line of text.trim().split(/\n+/)) {
             const production = line.trim().split(/\s+/)
@@ -30,7 +31,11 @@ export const InputGrammar = (props) => {
                     return
                 }
             }
-            productions.push(production)
+            const p = production.join('') // 'p' is a string consist of symbols in the production[]
+            if(!seen.has(p)) {
+                productions.push(production)
+                seen.add(p)
+            }
         }
 
         // check whether 'productions' is empty
