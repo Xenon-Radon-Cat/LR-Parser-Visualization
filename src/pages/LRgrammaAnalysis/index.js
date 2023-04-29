@@ -27,16 +27,18 @@ export const LRgramma = () => {
     const [automation, setAutomation] = useState(null)
     const [firstFollow, setFirstFollow] = useState(null)
     const [parseTable, setParseTable] = useState(null)
+    const [automationDots, setAutomationDots] = useState(null)
 
 
     const grammarUpdated = (grammar) => {
-        const automation = computeAutomation(grammar)
+        const { automation, automationDots } = computeAutomation(grammar)
         const firstFollow = computeFirstFollow(grammar)
         const parseTable = computeParseTable(grammar, automation, firstFollow)
         setGrammar(grammar)
         setAutomation(automation)
         setFirstFollow(firstFollow)
         setParseTable(parseTable)
+        setAutomationDots(automationDots)
     }
 
     if(automation === null) 
@@ -46,7 +48,7 @@ export const LRgramma = () => {
         <div className='LRGrammar'>
             <h1 className='header'>SLR Parser Visualization</h1>
             <InputGrammar  grammarUpdated={grammarUpdated}/>  
-            <Automation grammar={grammar} automation={automation}/>
+            <Automation automationDots={automationDots}/>
             <ParseTable grammar={grammar} firstFollow={firstFollow} parseTable={parseTable}/>
             <ParseExpression grammar={grammar} parseTable={parseTable}/>
         </div>
