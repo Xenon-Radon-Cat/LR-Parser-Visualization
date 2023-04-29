@@ -13,8 +13,19 @@ export const ParseExpression = (props) => {
     const [start, setStart] = useState(false)
     const [lastAction, setLastAction] = useState('')
     const [dot, setDot] = useState('')
+    const [stack, setStack] = useState('')
 
-    const parseStackRef = useRef([{ label: '', state: 0, nodeIndex: -1 }])
+    const parseStackRef = useRef([{ label: '$', state: 0, nodeIndex: -1 }])
+
+    const toSubscriptedNumber = (num) => {
+        // assert that num >= 0
+        const digits = '₀₁₂₃₄₅₆₇₈₉'
+        
+        if(num < 10)
+            return digits[num]
+        else
+            return toSubscriptedNumber(Math.floor(num / 10)) + digits[num % 10]
+    }
 
     const onTextChange = (e) => setText(e.target.value)
     const onStartClick = () => {
@@ -42,6 +53,7 @@ export const ParseExpression = (props) => {
         setStart(true)
         setLastAction('')
         setDot('')
+        setStack('$₀ ')
     }
 
     const onStepClick = () => {
@@ -83,6 +95,7 @@ export const ParseExpression = (props) => {
             setRemainingInput(remainingInput.slice(1))
             setLastAction(`shift ${token}`)
             setDot(dot + `${nodeIndex} [label="${token}"]\n`)
+            setStack(stack + `${token}${toSubscriptedNumber(number)} `)
         }
         else {
             // reduce and make the node and edges visible
@@ -100,8 +113,14 @@ export const ParseExpression = (props) => {
             const nextState = Number(parseTable[stateAfterPop][nonTerminal].slice(1))
             parseStack.push({ label: nonTerminal, state: nextState, nodeIndex })
 
+            const nextStack = parseStack.reduce(
+                (accumulator, stackTuple) => accumulator + `${stackTuple.label}${toSubscriptedNumber(stackTuple.state)} `,
+                ''
+              );
+
             setLastAction(`reduce by ${production.join(' ')}`)
             setDot(nextDot)
+            setStack(nextStack)
         }
     }
 
@@ -125,6 +144,10 @@ export const ParseExpression = (props) => {
                     <div className='InputCard bottom'>
                         <span>Last Action:</span>
                         <Input size='large' value={lastAction} disabled={true}/>
+                    </div>
+                    <div className='InputCard bottom'>
+                        <span>Stack:</span>
+                        <Input size='large' value={stack} disabled={true}/>
                     </div>
                 </Col>
                 <Col offset={1} span={16}>
