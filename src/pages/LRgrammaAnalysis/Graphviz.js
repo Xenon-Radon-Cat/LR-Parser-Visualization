@@ -15,17 +15,15 @@ export const Graphviz = (props) => {
             .duration(500);
     }
 
-    const options = {
-        height: 500, 
-        width: '100%', 
-        fit: true, 
-        zoomScaleExtent: [0.25, 4],
-    
-    }
-
     useEffect(() => 
     { 
-        graphviz(`#${identifier}`, options).transition(transitionFactory).renderDot(dot)
+        graphviz(`#${identifier}`, 
+        {
+            height: 500, 
+            width: '100%', 
+            fit: true, 
+            zoomScaleExtent: [0.25, 4],
+        }).transition(transitionFactory).renderDot(dot)
     }, [identifier, dot])   
 
     return (
