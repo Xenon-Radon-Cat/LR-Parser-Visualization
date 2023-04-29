@@ -14,9 +14,10 @@ const computeAutomation = (grammar) => {
         return { productionIndex: Math.floor(itemCode / 65536), dotIndex: itemCode % 65536 }
     }
 
-    const closure = (itemSet) => {
+    const closure = (itemSet, callback = () => {}) => {
         // itemSet: [ productionIndex: Number, dotIndex: Number ]
-        // compute closure of 'itemSet' and generate the dot language description about automation when 'itemSet' has changed
+        // compute closure of 'itemSet' and generate the dot language description about automation 
+        // when 'itemSet' has changed and 'callback' is generateDot()
 
         // assert that each item in the 'itemSet' is unique
         // 'seen' traces the items searched in the 'itemSet'
@@ -46,20 +47,64 @@ const computeAutomation = (grammar) => {
 
             // check whether the 'itemSet' has changed in the current iteration
             if(hasChanged) {
-                // generate the dot language description about automation
+                // generate the dot language description about automation if 'callback' is generateDot()
+                callback()
             }
         }
     }    
 
     const nodes = [[{ productionIndex: 0, dotIndex: 2 }]]
     const edges = [] // [{ sourceIndex: Number, targetIndex: Number, label: String }]
+    const automationDots = [] // Array<String>
+
+    const generateDot = () => {
+        // scan the automation to generate corresponding dot language description
+        // the function would only be called when automation has changed
+
+        // add the prologue
+        let dot = 'digraph { rankdir=LR;'
+
+        // add node statement list
+        for(const nodeIndex in nodes) {
+            // add node identifier and the prologue of attribute list
+            dot += `${nodeIndex} [label="q${nodeIndex}\n`
+            // add the productions
+            for(const { productionIndex, dotIndex } of nodes[nodeIndex]) {
+                const production = productions[productionIndex]
+                // add the part behind the dot
+                for(let i = 0; i < dotIndex; ++i)
+                    dot += production[i]
+                // add the dot
+                 dot += '.'
+                // add the part below the dot
+                for(let i = dotIndex; i < production.length; ++i)
+                    dot += production[i]
+                // add the newline
+                dot += '\n'
+            }
+            // add the epilog of attribute list
+            dot += '"];';
+        }
+
+        // add edge statement list
+        for(const { sourceIndex, targetIndex, label } of edges) {
+            // add the edge and the label
+            dot += `${sourceIndex} -> ${targetIndex} [label="${label}"];`
+        }
+
+        // add the epilog
+        dot += '}'
+
+        // push 'dot' into 'automationDots'
+        automationDots.push(dot)
+    }
 
     const computeAutomationHelper = (nodeIndex) => {     
         const edgeMap = new Map() // Map<String, [{ productionIndex: Number, dotIndex: Number }]>
 
         // assert that all the itemSets in the 'nodes'[0, 'nodeIndex') are clousres
         // assert that 'nodeIndex' is equal to 'nodes'.length - 1
-        closure(nodes[nodeIndex]) 
+        closure(nodes[nodeIndex], generateDot) 
         // assert that all the itemSets in the 'nodes' are closures
         
         // collect edges which start from 'nodeIndex'
@@ -108,6 +153,7 @@ const computeAutomation = (grammar) => {
 
                 // success to search
                 edges.push({ sourceIndex: nodeIndex, targetIndex: Number(searchIndex), label})
+                generateDot()
                 continue Loop1
             }
 
@@ -115,6 +161,7 @@ const computeAutomation = (grammar) => {
             // assert that all the itemSets in the 'nodes' are closures
             nodes.push(kernel)
             edges.push({ sourceIndex: nodeIndex, targetIndex: nodes.length - 1, label })
+            generateDot()
             // assert that all the itemSets in the 'nodes'[0, 'nodes'.length - 1) are clousres
             computeAutomationHelper(nodes.length - 1)
             // assert that all the itemSets in the 'nodes' are closures
@@ -123,9 +170,13 @@ const computeAutomation = (grammar) => {
         // assert that all the itemSets in the 'nodes' are closures 
     }
 
+    generateDot()
     computeAutomationHelper(0)
 
-    return { nodes, edges }
+    return { 
+        automation: { nodes, edges },
+        automationDots
+    }
 }
 
 const computeParseTable = (grammar, automation, firstFollow) => {
