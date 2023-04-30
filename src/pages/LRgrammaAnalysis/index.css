@@ -24,6 +24,11 @@
     color: #888;
 }
 
+.ant-row .ant-col .header {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 1.7em;
+}
+
 .InputGrammar .TextArea {
     font-size: 120%;
     color: rgb(120, 120, 120);
@@ -46,7 +51,7 @@
 }
 
 
-.ParseExpression, .Automation {
+.ParseExpression, .Graphs {
     text-align: left;
 }
 
@@ -85,6 +90,6 @@
     border-radius: 25px;
 }
 
-.Automation Button{
+.Graphs Button{
     margin-top: 25%;
 }
