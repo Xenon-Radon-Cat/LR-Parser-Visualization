@@ -1,30 +1,34 @@
-// component to render LR(0) automation
+// a component to render a series of graphs
 
 import { React, useEffect, useState } from "react"
 import { Space, Button } from "antd"
 import { Graphviz } from "./Graphviz"
 
-export const Automation = (props) => {
-    const { automationDots } = props
+export const Graphs = (props) => {
+    const { identifier, dots } = props
     const [ step, setStep ] = useState(0)
 
+    const onPrevClick = () => {
+        if(step > 0)
+            setStep(step - 1)
+    }
     const onNextClick = () => {
-        if(step + 1 < automationDots.length) {
+        if(step + 1 < dots.length) {
             setStep(step + 1)
         }
     }
     const onDoneClick = () => {
-        setStep(automationDots.length - 1)
+        setStep(dots.length - 1)
     }
 
 
-    useEffect(() => { setStep(0) }, [automationDots])
+    useEffect(() => { setStep(0) }, [dots])
 
     return (
-        <div className='Automation'>
-            <h2 className='header'>2. LR(0) Automation</h2>
-            <Graphviz identifier='automationGraph' dot={automationDots[step]}></Graphviz>
+        <div className='Graphs'>
+            <Graphviz identifier={identifier} dot={dots[step]}></Graphviz>
             <Space>
+                <Button type='primary' size='large' onClick={onPrevClick}>Do Prev</Button>
                 <Button type='primary' size='large' onClick={onNextClick}>Do Next</Button>
                 <Button type='primary' size='large' onClick={onDoneClick}>Do Done</Button>
             </Space>
