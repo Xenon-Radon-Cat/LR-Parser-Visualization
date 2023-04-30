@@ -24,7 +24,10 @@ export const Graphs = (props) => {
 
     useEffect(() => { setStep(0) }, [dots])
 
-    return (
+    // since the hook useEffect() is executed after render, which we use to reset 'step' when 'dots' changes
+    // therefore, we may meet an erratic phenomenon that 'step' would be equal or greater than 'dots.length'
+    // we could use a conditional expression to solve the above question
+    return step >= dots.length ? null : (
         <div className='Graphs'>
             <Graphviz identifier={identifier} dot={dots[step]}></Graphviz>
             <Space>
