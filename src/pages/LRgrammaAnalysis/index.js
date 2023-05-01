@@ -4,9 +4,10 @@ import React, { useState } from 'react'
 import './index.css'
 import { computeAutomation, computeParseTable, computeFirstFollow } from './compute'
 import { InputGrammar } from './InputGrammar'
-import { Automation } from './Automation'
+import { Graphs } from './Graphs'
 import { ParseTable } from './ParseTable'
 import { ParseExpression } from './ParseExpression'
+import { Row, Col } from "antd"
 
 export const LRgramma = () => {
     const [grammar, setGrammar] = useState({
@@ -27,16 +28,20 @@ export const LRgramma = () => {
     const [automation, setAutomation] = useState(null)
     const [firstFollow, setFirstFollow] = useState(null)
     const [parseTable, setParseTable] = useState(null)
+    const [automationDots, setAutomationDots] = useState(null)
+    const [firstFollowDots, setFirstFollowDots] = useState(null)
 
 
     const grammarUpdated = (grammar) => {
-        const automation = computeAutomation(grammar)
-        const firstFollow = computeFirstFollow(grammar)
+        const { automation, automationDots } = computeAutomation(grammar)
+        const { firstFollow, firstFollowDots } = computeFirstFollow(grammar)
         const parseTable = computeParseTable(grammar, automation, firstFollow)
         setGrammar(grammar)
         setAutomation(automation)
         setFirstFollow(firstFollow)
         setParseTable(parseTable)
+        setAutomationDots(automationDots)
+        setFirstFollowDots(firstFollowDots)
     }
 
     if(automation === null) 
@@ -46,7 +51,16 @@ export const LRgramma = () => {
         <div className='LRGrammar'>
             <h1 className='header'>SLR Parser Visualization</h1>
             <InputGrammar  grammarUpdated={grammarUpdated}/>  
-            <Automation grammar={grammar} automation={automation}/>
+            <Row>
+                <Col span={12}>
+                    <h2 className='header'>2. LR(0) Automation</h2>
+                    <Graphs identifier='automationGraphs' dots={automationDots}/>
+                </Col>
+                <Col offset={1} span={11}>
+                    <h2 className='header'>3. First & Follow</h2>
+                    <Graphs identifier='firstFollowGraphs' dots={firstFollowDots}/>
+                </Col>
+            </Row>
             <ParseTable grammar={grammar} firstFollow={firstFollow} parseTable={parseTable}/>
             <ParseExpression grammar={grammar} parseTable={parseTable}/>
         </div>
