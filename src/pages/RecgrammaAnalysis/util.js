@@ -1,5 +1,6 @@
 import { Circle, Rect, Stage, Layer, Text, Star } from 'react-konva'
 import Konva from "konva";
+import { DrawTree } from './test';
 export class Prod {
     constructor(str) {
         this.prod = str;
@@ -135,28 +136,34 @@ export class LL1 {
                 }
             }
         };
-        console.log(898989,ruleMap)
-      for(let i = 0;i< this.VN;i++){
-        const A = this.VN[i];
-        for(let j = 0;j < i;j++){
-            const B = this.VN[j];
-            if(this.canExpandTo(B,A,ruleMap,new Set())){
+        console.log(898989,ruleMap,this.VN)
+      for(let i = 0;i< this.VN.size;i++){
+
+        const A = [...this.VN][i];
+        // for(let j = 0;j < i;j++){
+        //     const B =[...this.VN][j];
+        //     console.log(8989898,A,B)
+            if(this.canExpandTo(A,A,ruleMap,new Set())){
                 return true;
             }
-        }
+       // }
       }
+      return false;
     }
 
     canExpandTo(start, target, directMap, visited){
-        if(start === target){
+        console.log(8989899,start,target,visited)
+        if(start === target && visited.size){
             return true;
         }
-        if(visited.has(start)){
-            return false;
-        }
-        visited.add(start);
-        for(const nt of directMap[start]){
-            if(this.canExpandTo(nt,target,directMap,visited)){
+        // if(visited.has(start)){
+        //     return false;
+        // }
+        // if(target !== start)
+        visited.add(target);
+        if(!directMap.has(target)) return false;
+        for(const nt of directMap.get(target)){
+            if(this.canExpandTo(start,nt,directMap,visited)){
                 return true;
             }
         }
@@ -296,6 +303,11 @@ export class LL1 {
         if (this.gra.length === 0) {
             this.gra.push([...this.VN][0]);
             this.root = new Node([...this.VN][0]);
+            this.tree = {
+                name: [...this.VN][0],
+                children: []
+            }
+            //this.treeNode = new DrawTree([...this.])
         }
 
         let value;
@@ -306,8 +318,16 @@ export class LL1 {
                 this.production = `${item} => ${value}`;
                 value = value.split('');
                 let n = this.find(this.root);
+                let treen = this.findtreenode(this.tree);
                 value.map((item) => {
                     n.children.push(new Node(item));
+                })
+                value.map((item) => {
+                    const tree = {
+                        name: item,
+                        children: []
+                    }
+                    treen.children.push(tree);
                 })
                 for (let k in this.gra) {
                     if (this.gra[k] === item) {
@@ -336,6 +356,15 @@ export class LL1 {
         if (this.VT.has(n.value)) return;
         for (let i = 0; i < n.children.length; i++) {
             let res = this.find(n.children[i]);
+            if (res) return res;
+        }
+    }
+
+    findtreenode(n){
+        if (this.VN.has(n.name) && n.children.length === 0) return n;
+        if (this.VT.has(n.name)) return;
+        for (let i = 0; i < n.children.length; i++) {
+            let res = this.findtreenode(n.children[i]);
             if (res) return res;
         }
     }
@@ -462,7 +491,6 @@ function rendernode(node, index) {
     let right = node.children.map((child) => child.value);
     cir.on('mouseover', function () {
         message.text(`${node.value} -> ${[...right].join()}`)
-        console.log(8888)
         layerg.draw();
     })
     return cir;

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Prod, LL1 } from './util.js';
 import { RenderTree } from './util.js';
 import { useTranslation } from 'react-i18next';
+import { DrawTree, buchheim } from './test.js';
 import './index.css';
 
 
@@ -63,7 +64,12 @@ export function Recgramma() {
             });
         }
         const isIndirect = LL.current.hasIndirectLeftRecursion();
-        console.log(isIndirect,43434);
+       if(isIndirect){
+        api.warning({
+            message: `文法间接左递归`,
+            placement: 'topRight',
+        });
+       }
         
         arr.forEach((item) => {
             LL.current.first(item);
@@ -149,8 +155,11 @@ export function Recgramma() {
             production: LL.current.production,
         }
         setStack([...stack, temp]);
-        console.log(LL.current.root, 'root')
-        RenderTree(LL.current.root);
+        console.log(LL.current.tree, 'tree')
+        const u = new DrawTree(LL.current.tree);
+        buchheim(u);
+        console.log(87878,u)
+      //  RenderTree(LL.current.root);
     }
 
     function reset() {
@@ -234,6 +243,9 @@ export function Recgramma() {
                 </div>
             </div>
             <div id="container">
+
+            </div>
+            <div id="container2">
 
             </div>
         </div>
