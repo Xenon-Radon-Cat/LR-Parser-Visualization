@@ -4,27 +4,60 @@ import React, { useRef, useState } from "react"
 import { Row, Col, Button, Input, Space } from 'antd'
 import { Graphviz }  from "./Graphviz"
 
+const { TextArea } = Input
+
 export const ParseExpression = (props) => {
-    const { grammar, parseTable } = props
+    const { grammar, automation, firstFollow, parseTable} = props
     const { productions } = grammar
+    const states = automation.nodes
+    const { follow } = firstFollow
 
     const [text, setText] = useState('( x ; x )')
     const [remainingInput, setRemainingInput] = useState([])
     const [start, setStart] = useState(false)
     const [lastAction, setLastAction] = useState('')
     const [dot, setDot] = useState('')
-    const [stack, setStack] = useState('')
+    const [symbolStack, setSymbolStack] = useState('')
+    const [stateStack, setStateStack] = useState(null) // stateStack: Array<TextArea>
 
     const parseStackRef = useRef([{ label: '$', state: 0, nodeIndex: -1 }])
 
-    const toSubscriptedNumber = (num) => {
-        // assert that num >= 0
-        const digits = '₀₁₂₃₄₅₆₇₈₉'
-        
-        if(num < 10)
-            return digits[num]
-        else
-            return toSubscriptedNumber(Math.floor(num / 10)) + digits[num % 10]
+    const itemToString = (item) => {
+        const { productionIndex, dotIndex } = item
+        const production = productions[productionIndex]
+        const nonTerminal = production[0]
+
+        let ret = ''
+
+        // add the part behind the dot
+        for(let i = 0; i < dotIndex; ++i)
+            ret += `${production[i]} `
+
+        // add the dot
+            ret += '. '
+
+        // add the part below the dot
+        for(let i = dotIndex; i < production.length; ++i)
+            ret += `${production[i]} `
+
+        // add the follow symbols of 'nonTerminal'
+        ret += `   [${[...follow.get(nonTerminal)].join(' ')}]`
+
+        return ret
+    }
+
+    const closureToString = (closure) => {
+        // clousure: Array<{ productionIndex: Number, dotIndex: Number }>
+        return closure.map(item => itemToString(item)).join('\n')
+    }
+
+    const updateStateStack = () => {
+        const parseStack = parseStackRef.current
+        const textAreas = []
+
+        for(let i = parseStack.length - 1; i >= 0; --i) 
+            textAreas.push(<TextArea className='TextArea' key={i} value={closureToString(states[parseStack[i].state])} autoSize={true} disabled/>)
+        setStateStack(textAreas)
     }
 
     const onTextChange = (e) => setText(e.target.value)
@@ -53,7 +86,8 @@ export const ParseExpression = (props) => {
         setStart(true)
         setLastAction('')
         setDot('')
-        setStack('$₀ ')
+        setSymbolStack('$ ')
+        updateStateStack()
     }
 
     const onStepClick = () => {
@@ -95,7 +129,8 @@ export const ParseExpression = (props) => {
             setRemainingInput(remainingInput.slice(1))
             setLastAction(`shift ${token}`)
             setDot(dot + `${nodeIndex} [label="${token}"]\n`)
-            setStack(stack + `${token}${toSubscriptedNumber(number)} `)
+            setSymbolStack(symbolStack + `${token} `)
+            updateStateStack()
         }
         else {
             // reduce and make the node and edges visible
@@ -113,20 +148,21 @@ export const ParseExpression = (props) => {
             const nextState = Number(parseTable[stateAfterPop][nonTerminal].slice(1))
             parseStack.push({ label: nonTerminal, state: nextState, nodeIndex })
 
-            const nextStack = parseStack.reduce(
-                (accumulator, stackTuple) => accumulator + `${stackTuple.label}${toSubscriptedNumber(stackTuple.state)} `,
+            const nextSymbolStack = parseStack.reduce(
+                (accumulator, stackTuple) => accumulator + `${stackTuple.label} `,
                 ''
               );
 
             setLastAction(`reduce by ${production.join(' ')}`)
             setDot(nextDot)
-            setStack(nextStack)
+            setSymbolStack(nextSymbolStack)
+            updateStateStack()
         }
     }
 
     return (
         <div className="ParseExpression">
-            <h2 className='header'>5. Parse</h2>
+            <h2 className='header'>4. Parse</h2>
             <Row>
                 <Col span={7}>
                     <div className='InputCard'>
@@ -146,8 +182,14 @@ export const ParseExpression = (props) => {
                         <Input size='large' value={lastAction} disabled={true}/>
                     </div>
                     <div className='InputCard bottom'>
-                        <span>Stack:</span>
-                        <Input size='large' value={stack} disabled={true}/>
+                        <span>Symbol Stack:</span>
+                        <Input size='large' value={symbolStack} disabled={true}/>
+                    </div>
+                    <div className='InputCard bottom'>
+                        <span>State Stack:</span>
+                        <div className='TextAreas'>
+                            {stateStack}
+                        </div>
                     </div>
                 </Col>
                 <Col offset={1} span={16}>
