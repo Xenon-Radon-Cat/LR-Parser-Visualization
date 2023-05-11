@@ -68,12 +68,12 @@ const computeAutomation = (grammar) => {
                 const production = productions[productionIndex]
                 // add the part behind the dot
                 for(let i = 0; i < dotIndex; ++i)
-                    dot += production[i]
+                    dot += `${production[i]} `
                 // add the dot
-                 dot += '.'
+                 dot += '. '
                 // add the part below the dot
                 for(let i = dotIndex; i < production.length; ++i)
-                    dot += production[i]
+                    dot += `${production[i]} `
                 // add the newline
                 dot += '\n'
             }
@@ -551,20 +551,14 @@ const computeFirstFollow = (grammar) => {
                 continue
             
             // prepare the symbols represented by 'nodes[nodeIndex]'
-            const symbols = []
-            for(const symbol of nodes[nodeIndex].symbols)
-                symbols.push(symbol)
+            const symbols = [...nodes[nodeIndex].symbols]
 
             // prepare the first set or follow set represented by 'nodes[nodeIndex]'
-            const firstOrFollows = []
-            if(nodes[nodeIndex].type === 'First') {
-                for(const symbol of first.get(symbols[0]))
-                    firstOrFollows.push(symbol)
-            }
-            else {
-                for(const symbol of follow.get(symbols[0]))
-                    firstOrFollows.push(symbol)
-            }
+            let firstOrFollows = null
+            if(nodes[nodeIndex].type === 'First') 
+                firstOrFollows = [...first.get(symbols[0])]
+            else 
+                firstOrFollows = [...follow.get(symbols[0])]
 
             dot += `${nodeIndex} [label="${nodes[nodeIndex].type}[${symbols.join(' ')}]\n[${firstOrFollows.join(' ')}]"];`
         }
