@@ -5,9 +5,29 @@ import './index.css'
 import { computeAutomation, computeParseTable, computeFirstFollow } from './compute'
 import { InputGrammar } from './InputGrammar'
 import { Graphs } from './Graphs'
-import { ParseTable } from './ParseTable'
 import { ParseExpression } from './ParseExpression'
-import { Row, Col } from "antd"
+import { Row, Col, Input } from "antd"
+
+const { TextArea } = Input
+
+const ChildComponent = (props) => {
+    const { header, text, identifier, dots } = props
+    
+    return (
+        <div>
+            <h2 className='header'>{header}</h2>
+            <Row>
+                <Col span={4}>
+                    <TextArea className="TextArea" value={text} autoSize={{minRows: 12, maxRows: 24}} disabled/>
+                </Col>
+                <Col offset={4} span={16}>
+                    <Graphs identifier={identifier} dots={dots}/>
+                </Col>
+            </Row>
+        </div>
+    )
+}
+
 
 export const LRgramma = () => {
     const [grammar, setGrammar] = useState({
@@ -47,22 +67,15 @@ export const LRgramma = () => {
     if(automation === null) 
         grammarUpdated(grammar)
 
+    const text = grammar.productions.map(production => production.join(' ')).join('\n')
+
     return (
         <div className='LRGrammar'>
             <h1 className='header'>SLR Parser Visualization</h1>
             <InputGrammar  grammarUpdated={grammarUpdated}/>  
-            <Row>
-                <Col span={12}>
-                    <h2 className='header'>2. LR(0) Automation</h2>
-                    <Graphs identifier='automationGraphs' dots={automationDots}/>
-                </Col>
-                <Col offset={1} span={11}>
-                    <h2 className='header'>3. First & Follow</h2>
-                    <Graphs identifier='firstFollowGraphs' dots={firstFollowDots}/>
-                </Col>
-            </Row>
-            <ParseTable grammar={grammar} firstFollow={firstFollow} parseTable={parseTable}/>
-            <ParseExpression grammar={grammar} parseTable={parseTable}/>
+            <ChildComponent header='2. LR(0) Automation' text={text} identifier='automationGraphs' dots={automationDots}></ChildComponent>
+            <ChildComponent header='3. First & Follow' text={text} identifier='firstFollowGraphs' dots={firstFollowDots}></ChildComponent>
+            <ParseExpression grammar={grammar} automation={automation} firstFollow={firstFollow} parseTable={parseTable}/>
         </div>
     )
 }
