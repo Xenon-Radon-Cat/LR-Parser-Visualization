@@ -13,10 +13,9 @@
     margin: 0 auto;
 }
 
-.InputGrammar {
+.InputGrammar, .ParseExpression, .Graphs {
     text-align: left;
 }
-
 
 .header {
     text-align: left;
@@ -24,14 +23,10 @@
     color: #888;
 }
 
-.ant-row .ant-col .header {
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 1.7em;
-}
-
-.InputGrammar .TextArea {
+.TextArea, .TextArea:disabled {
     font-size: 120%;
     color: rgb(120, 120, 120);
+    background: white;
 }
 
 .InputGrammar h3 {
@@ -50,15 +45,8 @@
     margin-top: 2%;
 }
 
-
-.ParseExpression, .Graphs {
-    text-align: left;
-}
-
 .ParseExpression .InputCard {
     margin: 2.5% auto;
-    font-size: 120%;
-    font-weight: 400;
 }
 
 .ParseExpression .InputCard.bottom {
@@ -68,13 +56,21 @@
 .ParseExpression .InputCard span {
     color: #777;
     line-height: 1.6;
+    font-size: 120%;
+    font-weight: 400;
 }
 
 .ParseExpression .InputCard input {
     margin: 2.5% auto;
     color: rgb(120, 120, 120);
+    background: white;
+    font-size:120%;
 }
 
+.ParseExpression .InputCard .TextAreas {
+    margin: 2.5% auto;
+    overflow: hidden;
+}
 
 .ParseExpression h3 {
     margin: 1% auto;
